@@ -1,0 +1,9 @@
+/ {
+    inputs {
+        compatible = "gpio-keys";
+        ir_input: ir_input {
+            label = "IR input";
+            gpios = <&gpiob 12 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+        };
+    };
+};

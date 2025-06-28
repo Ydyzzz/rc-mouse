@@ -1,0 +1,5 @@
+tests:
+  utilities.nec_decoder:
+    tags:
+      - nec
+    type: unit
