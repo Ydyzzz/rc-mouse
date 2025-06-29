@@ -176,6 +176,11 @@ static nec_decoder_result_e _nec_decoder_repeat_3(nec_decoder_t *decoder,
     nec_decoder_signal_t const *signal) {
   if (signal->form == ND_WAIT_FOR_REPEAT_FORM_NEG && ND_DUR_EQ(signal->duration, 2300)) {
     decoder->state = NEC_DECODER_REPEAT_4;
+  } else if (signal->form == ND_BURST_SIGNAL_FORM_2 && ND_DUR_EQ(signal->duration, ND_BURST_2_DURATION_US)) {
+    // TODO Write a test for this case
+    decoder->state = NEC_DECODER_BURST_2_PASSED;
+    decoder->prev_is_start = 0;
+    return NEC_DECODER_NEEDMORE;
   } else {
     decoder->state = NEC_DECODER_FAILED_TO_DECODE;
   }
@@ -228,9 +233,10 @@ nec_decoder_result_e nec_decoder_feed(nec_decoder_t *decoder,
   case NEC_DECODER_REPEAT_2:
     return _nec_decoder_repeat_2(decoder, message, signal);
     break;
-  case NEC_DECODER_REPEAT_3:
+  case NEC_DECODER_REPEAT_3: {
     return _nec_decoder_repeat_3(decoder, message, signal);
     break;
+    }
   case NEC_DECODER_REPEAT_4:
     return _nec_decoder_repeat_4(decoder, message, signal);
     break;
