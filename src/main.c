@@ -96,8 +96,8 @@ int main(void) {
     return -1;
   }
 
-	while (true) {
-    __asm__ volatile ("nop");
-	}
+  while (true) {
+    k_sleep(K_MSEC(100));
+  }
 	return 0;
 }
