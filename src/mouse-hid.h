@@ -16,4 +16,4 @@ typedef struct mouse_hid_action {
 } mouse_hid_action_t;
 
 int mouse_hid_init(char const *device_name);
-void mouse_hid_do( mouse_hid_action_t const *movement);
+void mouse_hid_do(mouse_hid_action_t const *action);

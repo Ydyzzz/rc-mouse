@@ -74,6 +74,7 @@ int mouse_hid_init(char const *device_name) {
 
 void mouse_hid_do(const mouse_hid_action_t *action) {
 	UDC_STATIC_BUF_DEFINE(report, MOUSE_REPORT_COUNT);
+  memset(report, 0, sizeof(report));
   mouse_hid_report_idx_e report_idx = 0;
   uint8_t value = 0;
 

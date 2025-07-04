@@ -20,10 +20,10 @@ static void _ir_input_on_data_reset(ir_input_handler_t *this, uint32_t val, uint
 
 static void _ir_input_on_data_received(ir_input_handler_t *this, uint32_t val, uint32_t tick) {
   uint32_t dt = 0;
+  // TODO need to check this
   if (tick > this->tick) {
     dt = k_cyc_to_us_ceil32(tick) - k_cyc_to_us_ceil32(this->tick);
   } else {
-    LOG_INF("tick overrun");
     dt = k_cyc_to_us_ceil32(UINT32_MAX - tick) + k_cyc_to_us_ceil32(this->tick);
   }
   nec_decoder_signal_t signal = {
@@ -39,21 +39,22 @@ static void _ir_input_on_data_received(ir_input_handler_t *this, uint32_t val, u
     }
   }
   if (nec_result == NEC_DECODER_MESSAGE_DECODED) {
-    this->on_message(this->nec_decoder_message.address, this->nec_decoder_message.command);
-    LOG_INF("decoded: address=%d, command=%d\n", this->nec_decoder_message.address, this->nec_decoder_message.command);
+    this->on_command(this->nec_decoder_message.address, this->nec_decoder_message.command);
+    //LOG_INF("decoded: address=%d, command=%d\n", this->nec_decoder_message.address, this->nec_decoder_message.command);
     // set timer
   }
   if (nec_result == NEC_DECODER_REPEAT_DECODED) {
-    LOG_INF("decoded: repeat");
+    //LOG_INF("decoded: repeat");
+    this->on_repeat();
   }
 
   this->val = val;
   this->tick = tick;
 }
 
-void ir_input_handler_init(ir_input_handler_t *handler) {
-  handler->on_incoming = _ir_input_on_data_reset;
-  handler->tick = 0;
-  handler->val = 0;
-  nec_decoder_init(&handler->nec_decoder);
+void ir_input_handler_init(ir_input_handler_t *this) {
+  this->on_incoming = _ir_input_on_data_reset;
+  this->tick = 0;
+  this->val = 0;
+  nec_decoder_init(&this->nec_decoder);
 }
