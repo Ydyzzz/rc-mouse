@@ -3,6 +3,7 @@
 #include "ir-input.h"
 #include "mouse-hid.h"
 #include "rc-mouse.h"
+#include "rc-command.h"
 
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
@@ -11,11 +12,9 @@
 #include <zephyr/sys/util.h>
 #include <zephyr/sys/slist.h>
 #include <zephyr/sys/time_units.h>
-
 #include <zephyr/usb/usb_device.h>
 #include <zephyr/usb/usbd.h>
 #include <zephyr/usb/class/usb_hid.h>
-
 #include <zephyr/logging/log.h>
 
 #include <string.h>
@@ -66,25 +65,29 @@ int ir_input_init() {
 void on_command(uint8_t address, uint8_t command) {
   ARG_UNUSED(address);
   rc_mouse_input_t input = {0};
-  if (command == 90) {
+  switch (command) {
+  case RC_COMMAND_RIGHT:
     input.type = RC_MOUSE_MOVE_RIGHT;
-  } else if (command == 8) {
+    break;
+  case RC_COMMAND_LEFT:
     input.type = RC_MOUSE_MOVE_LEFT;
-  } else if (command == 82) {
-    input.type = RC_MOUSE_MOVE_DOWN;
-  } else if (command == 24) {
+    break;
+  case RC_COMMAND_UP:
     input.type = RC_MOUSE_MOVE_UP;
-  } else {
-    return;
+    break;
+  case RC_COMMAND_DOWN:
+    input.type = RC_MOUSE_MOVE_DOWN;
+    break;
+  case RC_COMMAND_LEFT_CLICK:
+    input.type = RC_MOUSE_CLICK_LEFT;
+    break;
+  default:
+    LOG_WRN("unknown command='%d'", command);
   }
+
   if (k_msgq_put(&rc_mouse_msg_queue, &input, K_NO_WAIT) != 0) {
     LOG_ERR("can not put rc input");
   }
-  //mouse_hid_action_t action = {
-  //  .action = MOUSE_MOVE_Y,
-  //  .arg = 20,
-  //};
-  //mouse_hid_do(&action);
 }
 
 // ISR context

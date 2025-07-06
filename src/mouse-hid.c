@@ -5,6 +5,9 @@
 #include <zephyr/usb/usb_device.h>
 #include <zephyr/usb/usbd.h>
 
+#define MOUSE_BTN_LEFT		0
+#define MOUSE_BTN_RIGHT		1
+
 typedef enum mouse_hid_report_idx {
 	MOUSE_BTN_REPORT_IDX = 0,
 	MOUSE_X_REPORT_IDX = 1,
@@ -72,16 +75,19 @@ int mouse_hid_init(char const *device_name) {
   return 0;
 }
 
+
 void mouse_hid_do(const mouse_hid_action_t *action) {
+  static int click_state = 0;
 	UDC_STATIC_BUF_DEFINE(report, MOUSE_REPORT_COUNT);
   memset(report, 0, sizeof(report));
   mouse_hid_report_idx_e report_idx = 0;
   uint8_t value = 0;
 
   if (action->action == MOUSE_CLICK_LEFT || action->action == MOUSE_CLICK_RIGHT) {
-    // TODO implement later
+    click_state ^= 1;
+    rwup_if_suspended();
     report_idx = MOUSE_BTN_REPORT_IDX;
-    //value = WRITE_BIT(value, );
+    WRITE_BIT(value, action->action == MOUSE_CLICK_LEFT ? MOUSE_BTN_LEFT: MOUSE_BTN_RIGHT, click_state);
   } else {
     report_idx = action->action == MOUSE_MOVE_Y? MOUSE_Y_REPORT_IDX: MOUSE_X_REPORT_IDX;
     value = action->arg;

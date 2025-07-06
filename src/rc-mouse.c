@@ -1,9 +1,10 @@
 #include "rc-mouse.h"
+#include "mouse-hid.h"
 
 #include <zephyr/logging/log.h>
 #include <zephyr/kernel.h>
 
-#define RC_MOUSE_SPEED (5)
+#define RC_MOUSE_SPEED (7)
 
 LOG_MODULE_REGISTER(rc_mouse);
 
@@ -39,7 +40,7 @@ int rc_state_from_hid(rc_mouse_state_t *state, mouse_hid_action_t const *action)
 
 }
 
-void rc_mouse_thread(void *rc_mouse_raw, void *arg1, void*arg2) {
+void rc_mouse_thread(void *rc_mouse_raw, void *arg1, void *arg2) {
   UNUSED(arg1);
   UNUSED(arg2);
   rc_mouse_input_t input = {0};
@@ -49,7 +50,7 @@ void rc_mouse_thread(void *rc_mouse_raw, void *arg1, void*arg2) {
     k_msgq_get(rc_mouse->msgq, &input, K_FOREVER);
     if (input.type == RC_MOUSE_REPEAT) {
       if (rc_mouse->speed < 50) {
-        rc_mouse->speed += 2;
+        rc_mouse->speed += RC_MOUSE_SPEED;
       }
       if (_hid_from_rc_state(&action, rc_mouse) != 0) {
         LOG_WRN("got incorrent mouse state");
@@ -71,8 +72,15 @@ void rc_mouse_thread(void *rc_mouse_raw, void *arg1, void*arg2) {
       case RC_MOUSE_MOVE_RIGHT:
         action.action = MOUSE_MOVE_X;
         break;
+      case RC_MOUSE_CLICK_LEFT:
+        action.action = MOUSE_CLICK_LEFT;
+        break;
+      case RC_MOUSE_CLICK_RIGHT:
+        action.action = MOUSE_CLICK_RIGHT;
+        break;
       default:
-        // TODO CLICK
+        // repeat unreachable
+        LOG_WRN("incorrenct action");
         return;
         break;
       }
