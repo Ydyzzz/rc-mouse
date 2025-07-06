@@ -106,6 +106,7 @@ int main(void) {
   ir_input_handler.on_command = on_command;
   ir_input_handler.on_repeat = on_repeat;
 
+
   if (ir_input_init() != 0) {
     return -1;
   }
@@ -117,9 +118,12 @@ int main(void) {
   rc_mouse_start_thread(&rc_mouse_msg_queue);
   LOG_INF("rc-mouse thread started");
 
+
+  // to allow log thread out logs
+  k_thread_priority_set(k_current_get(), 15);
+
   while (true) {
-    // to allow log thread out logs
-    k_sleep(K_MSEC(100));
+    k_yield();
   }
 	return 0;
 }
